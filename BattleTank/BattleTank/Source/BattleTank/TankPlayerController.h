@@ -6,7 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "TankPlayerController.generated.h"
 
-class ATank;
+
 
 /**
  * Responsible for helping the player aim.
@@ -26,14 +26,17 @@ public:
 	void AimTowardsCrosshair();
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "Setup")
-	ATank* GetControlledTank() const;
+	
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Setup")
 	void FoundAimingComponent(UTankAimingComponent* AimingCompRef);
 
 private:
 	
+	virtual void SetPawn(APawn* InPawn) override;
+
+	UFUNCTION()
+	void PosssessedTankDeath();
 
 	bool GetLookVectorHitLocation(FVector LookDirection, FVector& HitLocation) const;
 

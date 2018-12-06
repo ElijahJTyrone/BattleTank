@@ -6,49 +6,37 @@
 #include "GameFramework/Pawn.h"
 #include "Tank.generated.h"
 
-class UTankBarrel;
-class UTankAimingComponent;
-class UTankMovementComponent;
-class AProjectile;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTankDelegate);
 
 UCLASS()
 class BATTLETANK_API ATank : public APawn
 {
 	GENERATED_BODY()
 
-public:
-	void AimAt(FVector HitLocation);
+public:	
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser) override;
 	
+	//Returns current health as a percentage of starting health
+	UFUNCTION(BlueprintPure, Category = "Health")
+	float GetHealthPercent() const;
 
-	UFUNCTION(BlueprintCallable)
-	void Fire();
-
-	UPROPERTY(EditDefaultsOnly, Category = "Setup")
-	TSubclassOf<AProjectile> ProjectileBlueprint;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Firing")
-	float LaunchSpeed = 100000;
-
-protected:
-
-	UPROPERTY(BlueprintReadOnly)
-	UTankAimingComponent* TankAimingComponent = nullptr;
-	UPROPERTY(BlueprintReadOnly)
-	UTankMovementComponent* TankMovementComponent = nullptr;
-	
+	FTankDelegate OnDeath;
 
 private:	
+
+	// Sets default values for this pawn's properties
+	ATank();
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// Sets default values for this pawn's properties
-	ATank();	
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	int32 StartingHealth = 100;
 
-	UTankBarrel*  Barrel = nullptr; //TODO Remove
+	UPROPERTY(VisibleAnywhere, Category = "Health")
+	int32 CurrentHealth;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Firing")
-	float ReloadTime = 3;
-	double LastFireTime = 0;
+	
 	
 };

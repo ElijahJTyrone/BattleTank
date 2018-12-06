@@ -3,7 +3,9 @@
 
 #include "TankAIController.h"
 #include "BattleTank.h"
-#include "Tank.h"
+#include "Tank.h"  //To implement OnDeath
+#include "TankAimingComponent.h"
+
 
 
 
@@ -17,18 +19,35 @@ void ATankAIController::Tick(float deltaTime)
 {	
 	Super::Tick(deltaTime);
 
-	auto PlayerTank = Cast<ATank>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	auto ControlledTank = Cast<ATank>(GetPawn());
+	auto PlayerTank = GetWorld()->GetFirstPlayerController()->GetPawn();
+	auto ControlledTank = GetPawn();
 
-	if (PlayerTank)
-	{
-
+	if (!ensure(PlayerTank && ControlledTank)) { return; }
+	
 		MoveToActor(PlayerTank, AcceptanceRadius);
-
-		ControlledTank->AimAt(PlayerTank->GetActorLocation());
-
-		ControlledTank->Fire();
-	} 
+		auto AimingComponent = ControlledTank->FindComponentByClass<UTankAimingComponent>();
+		AimingComponent->AimAt(PlayerTank->GetActorLocation());
+		if (AimingComponent->GetFiringStatus() == EFiringStatus::Locked)
+		{
+			AimingComponent->Fire();
+		}
+		
 
 }
 
+void ATankAIController::SetPawn(APawn* InPawn)
+{
+	Super::SetPawn(InPawn);
+	if (InPawn)
+	{
+		auto PossessedTank = Cast<ATank>(InPawn);
+		if (!ensure(PossessedTank)) { return; }
+		PossessedTank->OnDeath.AddUniqueDynamic(this, &ATankAIController::PosssessedTankDeath);
+	}
+}
+
+void ATankAIController::PosssessedTankDeath()
+{
+	if(!GetPawn()) { return; }
+	GetPawn()->DetachFromControllerPendingDestroy();
+}

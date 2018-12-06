@@ -7,7 +7,7 @@
 #include "AIController.h"
 #include "TankAIController.generated.h"
 
-class ATank;
+
 
 /**
  * 
@@ -17,11 +17,19 @@ class BATTLETANK_API ATankAIController : public AAIController
 {
 	GENERATED_BODY()
 	
-private:	
+protected:
 
-	void BeginPlay() override;
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+	float AcceptanceRadius = 80000;
+
+private:	
+	virtual void SetPawn(APawn* InPawn) override;
+
+	void BeginPlay() override;	
 
 	void Tick(float) override;
 
-	float AcceptanceRadius = 300;
+	UFUNCTION()
+	void PosssessedTankDeath();
+	
 };
